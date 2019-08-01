@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Box, Button, Heading, Menu, Text, TextArea, Keyboard, Grommet, grommet} from 'grommet';
-import { Notification } from 'grommet-icons';
+import { Box, Button, Heading, Menu, Text, TextArea, Keyboard, Layer, Grommet, grommet} from 'grommet';
+import { Notification, Chat } from 'grommet-icons';
 
 
 export const AppBar = (props) => (
@@ -65,7 +65,7 @@ export class SendMessageBar extends Component {
         <Keyboard onEnter={ (event) => this.handleEnter(event) }>
           <Box fill={ true }>
             <TextArea
-              placeholder='Say someting...'
+              placeholder='Say something...'
               onChange={ (event) => this.handleChange(event) }
               value={ this.state.text }
               resize={ false }
@@ -77,18 +77,51 @@ export class SendMessageBar extends Component {
   }
 }
 
-export const MessageList = (props) => (
-  <Box flex overflow='auto' direction='column'>
-    { props.messages.map((message) =>
-      <Message
-        userName={ message.user_name }
-        date={ message.timestamp }
-        message={ message.message }
-        {...props}
-      />
-    )}
-  </Box>
-);
+export class MessagePanel extends Component {
+  constructor (props) {
+    super(props);
+    this.state = {
+      notify: true
+    }
+    this.messageEnd = null;
+  }
+
+  scrollToBottom () {
+    this.messageEnd.scrollIntoView({ behavior: 'smooth' });
+    console.log(window.pageYOffset);
+  }
+
+  componentDidMount () {
+    this.scrollToBottom();
+  }
+
+  render () {
+    return (
+      <Box flex overflow='auto' direction='column' style={{ position: 'relative' }}>
+        { this.props.messages.map((message) =>
+          <Message
+            userName={ message.user_name }
+            date={ message.timestamp }
+            message={ message.message }
+            {...this.props}
+          />
+        )}
+        <div
+          style={{ float: 'left', clear: 'both'}}
+          ref={ (elem) => { this.messageEnd = elem; }}>
+        </div>
+        { this.state.notify && (
+          <Layer plain={ true } position='bottom' modal={ false }>
+            <Button
+              color={ 'status-ok' }
+              icon={ <Chat/> }
+              label={ 'New Message!' }
+              onClick={ () => {this.setState({notify: false})} }/>
+          </Layer>
+        )}
+      </Box>
+  )};
+}
 
 export const Message = (props) => (
   <Box
@@ -111,7 +144,7 @@ export const TestApp = (props) => (
   <Grommet theme={ grommet } full>
     <Box direction='column' fill>
       <AppBar/>
-      <MessageList
+      <MessagePanel
         messages={
           [
             {user_name: 'Joe', timestamp: new Date(), message: 'Hello!'},
