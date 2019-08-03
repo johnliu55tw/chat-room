@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, Button, Heading, Menu, Text, TextArea, Keyboard, Layer, Grommet, grommet} from 'grommet';
+import { Box, Button, Heading, Menu, Text, TextArea, Keyboard, Layer } from 'grommet';
 import { Notification, Chat } from 'grommet-icons';
 
 
@@ -81,23 +81,61 @@ export class MessagePanel extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      notify: true
+      atBottom: true
     }
-    this.messageEnd = null;
+    this.messageEndNode = null;
+    this.panelNode = null;
+  }
+
+  isAtBottom () {
+    let total = this.panelNode.scrollHeight - this.panelNode.clientHeight;
+    let diff = Math.abs(total - this.panelNode.scrollTop);
+    // The tolerance is 2 pixel
+    return (diff < 2);
   }
 
   scrollToBottom () {
-    this.messageEnd.scrollIntoView({ behavior: 'smooth' });
-    console.log(window.pageYOffset);
+    this.messageEndNode.scrollIntoView();
+  }
+
+  onPanelScroll () {
+    let isAtBottom = this.isAtBottom();
+    if (this.state.atBottom !== isAtBottom) {
+      console.log('Set at bottom to ' + isAtBottom.toString());
+      this.setState({atBottom: isAtBottom});
+    }
   }
 
   componentDidMount () {
+    console.log('did mount');
     this.scrollToBottom();
+  }
+
+  componentDidUpdate () {
+    console.log('did update');
+    if (this.state.atBottom) {
+      console.log('scroll to bottom');
+      this.scrollToBottom();
+    }
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.state.atBottom !== nextState.atBottom) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   render () {
     return (
-      <Box flex overflow='auto' direction='column' style={{ position: 'relative' }}>
+      <Box
+        overflow='auto'
+        direction='column'
+        style={{ position: 'relative' }}
+        ref={ (elem) => { this.panelNode = elem; }}
+        onScroll={ () => { this.onPanelScroll(); }}
+      >
         { this.props.messages.map((message) =>
           <Message
             userName={ message.user_name }
@@ -108,20 +146,26 @@ export class MessagePanel extends Component {
         )}
         <div
           style={{ float: 'left', clear: 'both'}}
-          ref={ (elem) => { this.messageEnd = elem; }}>
+          ref={ (elem) => { this.messageEndNode = elem; }}>
         </div>
-        { this.state.notify && (
-          <Layer plain={ true } position='bottom' modal={ false }>
-            <Button
-              color={ 'status-ok' }
-              icon={ <Chat/> }
-              label={ 'New Message!' }
-              onClick={ () => {this.setState({notify: false})} }/>
-          </Layer>
-        )}
       </Box>
   )};
 }
+
+export const NewMessageNotification = (props) => (
+  <Layer
+    plain={ true }
+    position='bottom'
+    modal={ false }
+    margin={{ bottom: '5em' }}
+  >
+    <Button
+      color={ 'status-ok' }
+      icon={ <Chat/> }
+      label={ 'New Message!' }
+      onClick={ () => {props.onClick()} }/>
+  </Layer>
+)
 
 export const Message = (props) => (
   <Box
@@ -140,40 +184,3 @@ export const Message = (props) => (
   </Box>
 );
 
-export const TestApp = (props) => (
-  <Grommet theme={ grommet } full>
-    <Box direction='column' fill>
-      <AppBar/>
-      <MessagePanel
-        messages={
-          [
-            {user_name: 'Joe', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Andy', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Johnny', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Joe', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Andy', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Johnny', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Joe', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Andy', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Johnny', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Joe', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Andy', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Johnny', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Joe', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Andy', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Johnny', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Johnny', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Joe', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Andy', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Joe', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Andy', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Andy', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Joe', timestamp: new Date(), message: 'Hello!'},
-            {user_name: 'Andy', timestamp: new Date(), message: 'Hello!'},
-          ]
-        }
-      />
-      <SendMessageBar/>
-    </Box>
-  </Grommet>
-);

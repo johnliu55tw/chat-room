@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { TestApp } from './chat_room/view.js'
+import { TestApp } from './chat_room/presenter.js'
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(<TestApp />, document.getElementById('root'));
