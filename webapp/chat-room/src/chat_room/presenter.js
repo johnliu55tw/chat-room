@@ -43,6 +43,12 @@ export class TestApp extends Component {
     ));
   }
 
+  onSendMessage (text) {
+    this.onNewMessageReceived(
+      {user_name: 'You', timestamp: new Date(), message: text}
+    )
+  }
+
   render () {
     return (
       <Grommet theme={ grommet } full>
@@ -51,7 +57,7 @@ export class TestApp extends Component {
           <MessagePanelPresenter
             messages={ this.state.messages }
           />
-          <SendMessageBar onSend={ (text) => {} }/>
+          <SendMessageBar onSend={ (text) => {this.onSendMessage(text)} }/>
         </Box>
       </Grommet>
     );
