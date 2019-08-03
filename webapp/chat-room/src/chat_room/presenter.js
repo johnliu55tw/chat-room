@@ -81,12 +81,12 @@ export class TestApp extends Component {
             userName={
               this.state.userSession !== null ? this.state.userSession.name : ''
             }
-            onLogOut={ () => this.onLogOut() }
+            logOut={ () => this.onLogOut() }
           />
           <MessagePanelPresenter
             messages={ this.state.messages }
           />
-          <SendMessageBar onSend={ (text) => {this.onSendMessage(text)} }/>
+          <SendMessageBar sendMessage={ (text) => {this.onSendMessage(text)} }/>
           { this.state.userSession === null &&
             <LoginWindowPresenter
               onLoggedIn={ (sessionData) => {this.onLoggedIn(sessionData)} }

@@ -25,7 +25,7 @@ export const AppBar = (props) => (
           </Text>
         </Box> }
       items={[
-      {label: 'Log out', onClick: props.onLogOut},
+      {label: 'Log out', onClick: props.logOut},
     ]}/>
     <Button icon={<Notification/>} />
   </Box>
@@ -43,9 +43,7 @@ export class SendMessageBar extends Component {
     if (!event.shiftKey) {
       let text = event.target.value;
       console.log('Enter: ' + text);
-      if (this.props.onSend !== undefined) {
-        this.props.onSend(text);
-      }
+      this.props.sendMessage(text);
       this.setState({text: ''});
     }
   }
