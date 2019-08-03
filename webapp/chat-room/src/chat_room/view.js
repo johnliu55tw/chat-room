@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, Button, Heading, Menu, Text, TextArea, Keyboard, Layer } from 'grommet';
+import { Box, Button, Heading, Menu, Text, TextArea, Keyboard, Layer, Form, FormField } from 'grommet';
 import { Notification, Chat } from 'grommet-icons';
 
 
@@ -201,3 +201,53 @@ class Message extends Component {
   }
 }
 
+export class LoginWindow extends Component {
+  constructor (props) {
+    super(props);
+  }
+
+  onSubmit (evt) {
+    if (this.props.onSubmit !== undefined) {
+      this.props.onSubmit(evt)
+    }
+  }
+
+  renderButton () {
+    if (this.props.checking) {
+      return (<Button type="submit" disabled primary label="Checking..." />)
+    } else {
+      return (<Button type="submit" primary label="Go!" />)
+    }
+  }
+
+  getCheckResult (fieldName) {
+    if (this.props.checkResult === null) {
+      return null;
+    } else {
+      return this.props.checkResult[fieldName];
+    }
+  }
+
+  render () {
+    return (
+      <Layer animation='fadeIn'>
+        <Box pad='medium'>
+          <Form onSubmit={ (evt) => {this.onSubmit(evt)} }>
+            <FormField
+              required={ true }
+              validate={ {
+                regexp: /^[a-zA-Z0-9_ -]+$/,
+                message: 'Invalid characers!'}
+              }
+              error={ this.getCheckResult('name') }
+              name='name'
+              disabled={ this.props.checking }
+              label='Your Name:'
+            />
+            { this.renderButton() }
+          </Form>
+        </Box>
+      </Layer>
+    )
+  }
+}
