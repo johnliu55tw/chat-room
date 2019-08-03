@@ -167,20 +167,37 @@ export const NewMessageNotification = (props) => (
   </Layer>
 )
 
-export const Message = (props) => (
-  <Box
-    flex={ false }
-    direction='column'
-    background='light-4'
-    pad={{ left: 'small', right: 'small', vertical: 'small' }}
-    elevation='none'
-    {...props}
-  >
-    <Box direction='row' justify='between' align='start'>
-      <Text weight='bold' textAlign='start'>{ props.userName }</Text>
-      <Text weight='normal' size='small' textAlign='end'>{ props.date.toString() }</Text>
-    </Box>
-    <Text weight='normal' size='medium'>{ props.message }</Text>
-  </Box>
-);
+class Message extends Component {
+  constructor (props) {
+    super(props);
+    this.state = {
+      hover: false
+    }
+  }
+
+  render () {
+    return (
+      <Box
+        flex={ false }
+        direction='column'
+        background={ this.state.hover ? 'light-4' : 'light-3' }
+        pad={{ left: 'small', right: 'small', vertical: 'small' }}
+        elevation='none'
+        onMouseEnter={ () => this.setState({hover: true}) }
+        onMouseLeave={ () => this.setState({hover: false}) }
+        {...this.props}
+      >
+        <Box direction='row' justify='between' align='start'>
+          <Text weight='bold' textAlign='start'>{ this.props.userName }</Text>
+          { this.state.hover && (
+            <Text weight='normal' size='small' textAlign='end'>
+              { this.props.date.toString() }
+            </Text>
+          )}
+        </Box>
+        <Text weight='normal' size='medium'>{ this.props.message }</Text>
+      </Box>
+    );
+  }
+}
 
