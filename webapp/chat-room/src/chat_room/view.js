@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Box, Button, Heading, Menu, Text, TextArea, Keyboard, Layer, Form, FormField } from 'grommet';
-import { Notification, Chat } from 'grommet-icons';
+import { Box, Button, Menu, Text, TextArea, Keyboard, Layer, Form, FormField } from 'grommet';
+import { Notification, Chat, User } from 'grommet-icons';
 
 
 export const AppBar = (props) => (
@@ -16,8 +16,17 @@ export const AppBar = (props) => (
     pad={{ left: 'small', right: 'small', vertical: 'xsmall' }}
     {...props}
   >
-    <Menu/>
-    <Heading level='2' margin='none'>Chat Room!</Heading>
+    <Menu
+      label={
+        <Box direction='row'>
+          <User/>
+          <Text margin={{ left: 'small' }} weight='bold'>
+            { props.userName }
+          </Text>
+        </Box> }
+      items={[
+      {label: 'Log out', onClick: props.onLogOut},
+    ]}/>
     <Button icon={<Notification/>} />
   </Box>
 );

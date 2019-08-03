@@ -68,11 +68,21 @@ export class TestApp extends Component {
     this.setState({userSession: sessionData});
   }
 
+  onLogOut () {
+    this.sessionManager.clearCurrentSession();
+    this.setState({userSession: null});
+  }
+
   render () {
     return (
       <Grommet theme={ grommet } full>
         <Box fill>
-          <AppBar/>
+          <AppBar
+            userName={
+              this.state.userSession !== null ? this.state.userSession.name : ''
+            }
+            onLogOut={ () => this.onLogOut() }
+          />
           <MessagePanelPresenter
             messages={ this.state.messages }
           />
