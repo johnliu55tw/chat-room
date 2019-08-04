@@ -142,21 +142,13 @@ class LoginWindowPresenter extends Component {
   onSubmit (evt) {
     console.log('Submit!');
     console.log(evt.value);
-    this.setState({checking: true})
-    axios.post('/users/', evt.value)
-      .then((resp) => {
-        this.onResultReceived({ok: true, sessionData: resp.data})
-      })
-      .catch((error) => {
-        if (error.response) {
-          this.onResultReceived({ok: false, reason: error.response.data});
-        } else if (error.request) {
-          this.onResultReceived({ok: false, reason: null});
-        } else {
-          console.log('Error on request!');
-          console.log(error);
-        }
-      })
+    this.setState({checking: true});
+    this.onResultReceived({
+      ok: true,
+      sessionData: {
+        username: evt.value.username
+      }
+    });
   }
 
   onResultReceived (result) {
