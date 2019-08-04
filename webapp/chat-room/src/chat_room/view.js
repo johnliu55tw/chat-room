@@ -246,8 +246,8 @@ export class LoginWindow extends Component {
                 regexp: /^[a-zA-Z0-9_ -]+$/,
                 message: 'Invalid characers!'}
               }
-              error={ this.getCheckResult('name') }
-              name='name'
+              error={ this.getCheckResult('username') }
+              name='username'
               disabled={ this.props.checking }
               label='Your Name:'
             />

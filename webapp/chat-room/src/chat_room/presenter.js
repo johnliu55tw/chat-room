@@ -4,6 +4,8 @@ import { Box, Grommet, grommet } from 'grommet';
 import { AppBar, MessagePanel, SendMessageBar, NewMessageNotification, LoginWindow } from './view.js';
 import { SessionManager } from './model.js';
 
+import axios from 'axios';
+
 export class TestApp extends Component {
   constructor (props) {
     super(props);
@@ -57,7 +59,7 @@ export class TestApp extends Component {
   onSendMessage (text) {
     // Test
     this.onNewMessageReceived(
-      {user_name: this.state.userSession.name, timestamp: new Date(), message: text}
+      {user_name: this.state.userSession.username, timestamp: new Date(), message: text}
     )
   }
 
@@ -79,7 +81,7 @@ export class TestApp extends Component {
         <Box fill>
           <AppBar
             userName={
-              this.state.userSession !== null ? this.state.userSession.name : ''
+              this.state.userSession !== null ? this.state.userSession.username : ''
             }
             logOut={ () => this.onLogOut() }
           />
@@ -141,12 +143,20 @@ class LoginWindowPresenter extends Component {
     console.log('Submit!');
     console.log(evt.value);
     this.setState({checking: true})
-    // Test
-    setTimeout(() => this.onResultReceived({
-      ok: true,
-      reason: {name: 'Nah'},
-      sessionData: {name: evt.value.name, id: 'some-id'}
-    }), 1000);
+    axios.post('/users/', evt.value)
+      .then((resp) => {
+        this.onResultReceived({ok: true, sessionData: resp.data})
+      })
+      .catch((error) => {
+        if (error.response) {
+          this.onResultReceived({ok: false, reason: error.response.data});
+        } else if (error.request) {
+          this.onResultReceived({ok: false, reason: null});
+        } else {
+          console.log('Error on request!');
+          console.log(error);
+        }
+      })
   }
 
   onResultReceived (result) {
