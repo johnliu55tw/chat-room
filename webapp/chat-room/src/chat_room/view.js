@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, Button, Menu, Text, TextArea, Keyboard, Layer, Form, FormField } from 'grommet';
+import { Box, Button, Menu, Text, Paragraph, TextArea, Keyboard, Layer, Form, FormField } from 'grommet';
 import { Notification, Chat, User } from 'grommet-icons';
 
 
@@ -202,11 +202,17 @@ class Message extends Component {
             </Text>
           )}
         </Box>
-        <Text weight='normal' size='medium'>{ this.props.message }</Text>
+        <MessageBody message={ this.props.message }/>
       </Box>
     );
   }
 }
+
+export const MessageBody = (props) => (
+  props.message.split('\n').map((msg) => (
+    <Paragraph margin={ {top: '0', bottom: '0'} }>{ msg }</Paragraph>
+  ))
+)
 
 export class LoginWindow extends Component {
   constructor (props) {
