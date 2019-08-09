@@ -112,11 +112,17 @@ class MessagePanelPresenter extends Component {
     this.forceUpdate();
   }
 
+  onScrollToBottom () {
+    console.log('Scrolled to bottom!');
+    this.forceUpdate();
+  }
+
   render () {
     return (
       <Box flex>
         <MessagePanel
           messages={ this.props.messages }
+          scrollToBottom={ () => this.onScrollToBottom() }
           ref={ (elem) => {this.messagePanel = elem;} }
         />
         { this.messagePanel !== null && !this.messagePanel.isAtBottom() && (

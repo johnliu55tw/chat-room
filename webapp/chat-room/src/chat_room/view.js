@@ -110,6 +110,9 @@ export class MessagePanel extends Component {
     if (this.state.atBottom !== isAtBottom) {
       console.log('Set at bottom to ' + isAtBottom.toString());
       this.setState({atBottom: isAtBottom});
+      if (isAtBottom && this.props.scrollToBottom !== undefined) {
+        this.props.scrollToBottom();
+      }
     }
   }
 
