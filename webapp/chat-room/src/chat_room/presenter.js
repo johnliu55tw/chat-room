@@ -2,35 +2,30 @@ import React, { Component } from 'react';
 import { Box, Grommet, grommet } from 'grommet';
 
 import { AppBar, MessagePanel, SendMessageBar, NewMessageNotification, LoginWindow } from './view.js';
-import { SessionManager } from './model.js';
-
-import axios from 'axios';
+import { SessionManager, MessageManager } from './model.js';
 
 export class TestApp extends Component {
   constructor (props) {
     super(props);
 
     this.sessionManager = new SessionManager();
+    this.messageManager = new MessageManager();
+    this.messageManager.onReceiveCallback = (userName, msg, msgId, ts) => {
+      this.onNewMessageReceived(userName, msg, msgId, ts)
+    }
 
     this.state = {
       userSession: null,
       messages: [
         // Test
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
+        {id: '1', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
+        {id: '2', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
+        {id: '3', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
+        {id: '4', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
+        {id: '5', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
+        {id: '6', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
+        {id: '7', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
+        {id: '8', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
       ]
     }
   }
@@ -40,27 +35,29 @@ export class TestApp extends Component {
     console.log('Stored user session:')
     console.log(userSession);
     this.setState({userSession: userSession});
-    // Test message receiving
-    setTimeout(() => {
-      this.onNewMessageReceived(
-        {user_name: 'Joe', timestamp: new Date(), message: 'Hello!'}
-      )},
-      3000);
   }
 
-  onNewMessageReceived (message) {
+  onNewMessageReceived (userName, message, messageId, timestamp) {
     console.log('Message received');
-    console.log(message);
+    console.log('From: ' + userName);
+    console.log('Msg: ' + message);
+    console.log('Msg ID: ' + messageId);
+    console.log('TS: ' + timestamp);
+
+    let msgObj = {
+      'id': messageId,
+      'user_name': userName,
+      'timestamp': timestamp,
+      'message': message
+    };
+
     this.setState( prevState => (
-      {messages: [...prevState.messages, message]}
+      {messages: [...prevState.messages, msgObj]}
     ));
   }
 
   onSendMessage (text) {
-    // Test
-    this.onNewMessageReceived(
-      {user_name: this.state.userSession.username, timestamp: new Date(), message: text}
-    )
+    this.messageManager.send(this.state.userSession.username, text);
   }
 
   onLoggedIn (sessionData) {

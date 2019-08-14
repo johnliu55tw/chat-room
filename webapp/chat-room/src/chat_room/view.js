@@ -151,6 +151,7 @@ export class MessagePanel extends Component {
             userName={ message.user_name }
             date={ message.timestamp }
             message={ message.message }
+            key={ message.id }
             {...this.props}
           />
         )}
@@ -212,16 +213,14 @@ class Message extends Component {
 }
 
 export const MessageBody = (props) => (
-  props.message.split('\n').map((msg) => (
-    <Paragraph margin={ {top: '0', bottom: '0'} }>{ msg }</Paragraph>
+  props.message.split('\n').map((msg, index) => (
+    <Paragraph key={ index } margin={ {top: '0', bottom: '0'} }>
+      { msg }
+    </Paragraph>
   ))
 )
 
 export class LoginWindow extends Component {
-  constructor (props) {
-    super(props);
-  }
-
   onSubmit (evt) {
     if (this.props.onSubmit !== undefined) {
       this.props.onSubmit(evt)
