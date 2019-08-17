@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels',
     'ws',
+    'users',
+    'user_messages',
 ]
 
 REST_FRAMEWORK = {
