@@ -1,9 +1,15 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from user_messages.models import UserMessage
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+
+class UserSerializer(serializers.ModelSerializer):
+    messages = serializers.PrimaryKeyRelatedField(
+        queryset=UserMessage.objects.all(),
+        many=True)
+
     class Meta:
         model = User
-        fields = ['url', 'username']
+        fields = ['id', 'username', 'messages']
         read_only_fields = ['username']
