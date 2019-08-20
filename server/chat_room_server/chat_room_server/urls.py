@@ -16,10 +16,18 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from rest_framework.routers import DefaultRouter
+
+from users.views import UserViewSet
+from user_messages.views import UserMessageViewSet
+
+
+router = DefaultRouter()
+router.register(r'users', UserViewSet, basename='user')
+router.register(r'user_messages', UserMessageViewSet, basename='user_message')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('users.urls')),
-    path('api/', include('user_messages.urls')),
     path('api/auth/', include('rest_framework.urls')),
+    path('api/', include(router.urls)),
 ]

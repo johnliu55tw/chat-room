@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import UserMessage
 
 
-class UserMessageSerializer(serializers.ModelSerializer):
+class UserMessageSerializer(serializers.HyperlinkedModelSerializer):
     sender = serializers.ReadOnlyField(source='sender.username')
 
     class Meta:
