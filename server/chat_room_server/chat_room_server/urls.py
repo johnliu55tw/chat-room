@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 from rest_framework.routers import DefaultRouter
+from rest_framework.authtoken import views
 
 from users.views import UserViewSet
 from user_messages.views import UserMessageViewSet
@@ -28,6 +29,6 @@ router.register(r'user_messages', UserMessageViewSet, basename='user_message')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/auth/', include('rest_framework.urls')),
+    path('api/auth/', views.obtain_auth_token),
     path('api/', include(router.urls)),
 ]
