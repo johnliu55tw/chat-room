@@ -10,9 +10,12 @@ logger = logging.getLogger(__name__)
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
-        logger.warning('Connected!')
-        await self.accept()
-        await self.channel_layer.group_add('chat', self.channel_name)
+        if self.scope.get('user') is None:
+            await self.close()
+        else:
+            logger.info('Connected by user: {}'.format(self.scope.get('user').username))
+            await self.accept()
+            await self.channel_layer.group_add('chat', self.channel_name)
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard('chat', self.channel_name)
