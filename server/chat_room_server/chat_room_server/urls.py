@@ -23,12 +23,12 @@ from users.views import UserViewSet
 from user_messages.views import UserMessageViewSet
 
 
-router = DefaultRouter()
+router = DefaultRouter(trailing_slash=False)
 router.register(r'users', UserViewSet, basename='user')
 router.register(r'user_messages', UserMessageViewSet, basename='user_message')
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/auth/', views.obtain_auth_token),
+    path('admin', admin.site.urls),
+    path('api/auth', views.obtain_auth_token),
     path('api/', include(router.urls)),
 ]
