@@ -38,7 +38,7 @@ export class MessageManager {
     console.log(wsMsg);
     let data = JSON.parse(wsMsg.data);
     this.onReceiveCallback(
-      data['user_name'],
+      data['username'],
       data['content'],
       data['id'],
       new Date(data['timestamp'] * 1000)

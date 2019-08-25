@@ -27,7 +27,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         message_payload = {
             'type': 'chat.message',
             'text': json.dumps({
-                'user_name': user_name,
+                'username': user_name,
                 'content': message,
                 'id': str(msg_id),
                 'timestamp': time.time()

@@ -1,7 +1,10 @@
 import os
-import time
+import json
 
 from celery import Celery
+from asgiref.sync import async_to_sync
+
+from channels.layers import get_channel_layer
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chat_room_server.settings')
@@ -17,7 +20,16 @@ def debug_task(self):
 
 @app.task
 def message_notify(msg_dict):
-    time.sleep(5)
-    with open('/tmp/test', 'w') as f:
-        f.write(str(type(msg_dict)) + '\n')
-        f.write(str(msg_dict))
+    channel_layer = get_channel_layer()
+
+    message_payload = {
+        'type': 'chat.message',
+        'text': json.dumps({
+            'username': msg_dict['sender'],
+            'content': msg_dict['content'],
+            'id': str(msg_dict['id']),
+            'timestamp': msg_dict['created']
+        })
+    }
+
+    async_to_sync(channel_layer.group_send)('chat', message_payload)
