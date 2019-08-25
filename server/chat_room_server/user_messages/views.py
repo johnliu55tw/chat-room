@@ -1,5 +1,9 @@
+import logging
+
 from rest_framework import permissions
 from rest_framework import viewsets
+
+from chat_room_server import celery
 
 from .models import UserMessage
 from .serializers import UserMessageSerializer
@@ -17,3 +21,4 @@ class UserMessageViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(sender=self.request.user)
+        celery.message_notify.delay(serializer.data)

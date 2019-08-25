@@ -143,3 +143,6 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# Celery
+CELERY_BROKER_URL = 'redis://localhost'
