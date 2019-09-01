@@ -1,40 +1,123 @@
 import React, { Component } from 'react';
 import { Box, Grommet, grommet } from 'grommet';
+import axios from 'axios';
 
 import { AppBar, MessagePanel, SendMessageBar, NewMessageNotification, LoginWindow } from './view.js';
 import { SessionManager, MessageManager } from './model.js';
 
 export class TestApp extends Component {
+
   constructor (props) {
     super(props);
-
-    this.sessionManager = new SessionManager();
-    this.messageManager = new MessageManager();
-    this.messageManager.onReceiveCallback = (userName, msg, msgId, ts) => {
-      this.onNewMessageReceived(userName, msg, msgId, ts)
-    }
-
     this.state = {
-      userSession: null,
-      messages: [
-        // Test
-        {id: '1', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {id: '2', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {id: '3', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {id: '4', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {id: '5', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {id: '6', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {id: '7', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-        {id: '8', user_name: 'WUUUUUUT', timestamp: new Date(), message: 'Hello!'},
-      ]
+      sessionData: null
     }
+    this.sessionManager = null;
   }
 
   componentDidMount () {
-    let userSession = this.sessionManager.getCurrentSession();
-    console.log('Stored user session:')
-    console.log(userSession);
-    this.setState({userSession: userSession});
+    this.sessionManager = new SessionManager();
+    let newSessionData = this.sessionManager.getCurrentSession();
+    if (newSessionData !== null) {
+      this.setState({
+        sessionData: newSessionData
+      });
+    }
+  }
+
+  onSessionUpdate (newSessionData) {
+    console.log('onSessionUpdate');
+    console.log(newSessionData);
+    if (newSessionData === null) {
+      this.sessionManager.clearCurrentSession();
+    } else {
+      this.sessionManager.setCurrentSession(newSessionData);
+    }
+    this.setState({
+      sessionData: newSessionData
+    });
+  }
+
+  render () {
+    return (
+      <Grommet theme={ grommet } full>
+        <Box fill>
+          <AppBarPresenter
+            sessionData={ this.state.sessionData }
+            sessionUpdateHandler={ (sData) => {this.onSessionUpdate(sData)} }
+          />
+          <MessagePanelPresenter
+            sessionData={ this.state.sessionData }
+          />
+          <SendMessagePresenter
+            sessionData={ this.state.sessionData }
+          />
+          <LoginPresenter
+            sessionData={ this.state.sessionData }
+            sessionUpdateHandler={ (sData) => {this.onSessionUpdate(sData)} }
+          />
+        </Box>
+      </Grommet>
+    )
+  }
+}
+
+class AppBarPresenter extends Component {
+
+  getUserName () {
+    return this.props.sessionData !== null ? this.props.sessionData.userName : '';
+  }
+
+  onLogOut () {
+    this.props.sessionUpdateHandler(null);
+    console.log('logout clicked!');
+  }
+
+  render () {
+    return (
+      <AppBar
+        userName={ this.getUserName() }
+        logOut={ () => {this.onLogOut()} }
+      />
+    )
+  }
+}
+
+class MessagePanelPresenter extends Component {
+  constructor (props) {
+    super(props);
+    this.state = {
+      messages: []
+    };
+
+    this.messagePanel = null;
+    this.messageManager = null;
+  }
+
+  componentDidUpdate (prevProps, prevState, snapshot) {
+    if (prevProps.sessionData === null && this.props.sessionData !== null) {
+      // User logged in
+      console.log('Session Data updated, create message manager.');
+      this.messageManager = new MessageManager(
+        this.props.sessionData.token,
+        this.onNewMessageReceived.bind(this),
+      );
+    } else if (this.props.sessionData === null && this.messageManager !== null) {
+      console.log('Log out!!!');
+      this.messageManager.close();
+      this.messageManager = null;
+    }
+  }
+
+  onNewMessageClick () {
+    this.messagePanel.scrollToBottom();
+    // Calling forceUpdate to "remove" the new message button
+    this.forceUpdate();
+  }
+
+  onScrollToBottom () {
+    console.log('Scrolled to bottom!');
+    this.forceUpdate();
   }
 
   onNewMessageReceived (userName, message, messageId, timestamp) {
@@ -60,65 +143,11 @@ export class TestApp extends Component {
     this.messageManager.send(this.state.userSession.username, text);
   }
 
-  onLoggedIn (sessionData) {
-    console.log('User logged in!');
-    console.log(sessionData);
-    this.sessionManager.setCurrentSession(sessionData);
-    this.setState({userSession: sessionData});
-  }
-
-  onLogOut () {
-    this.sessionManager.clearCurrentSession();
-    this.setState({userSession: null});
-  }
-
-  render () {
-    return (
-      <Grommet theme={ grommet } full>
-        <Box fill>
-          <AppBar
-            userName={
-              this.state.userSession !== null ? this.state.userSession.username : ''
-            }
-            logOut={ () => this.onLogOut() }
-          />
-          <MessagePanelPresenter
-            messages={ this.state.messages }
-          />
-          <SendMessageBar sendMessage={ (text) => {this.onSendMessage(text)} }/>
-          { this.state.userSession === null &&
-            <LoginWindowPresenter
-              onLoggedIn={ (sessionData) => {this.onLoggedIn(sessionData)} }
-            />
-          }
-        </Box>
-      </Grommet>
-    );
-  }
-}
-
-class MessagePanelPresenter extends Component {
-  constructor (props) {
-    super(props);
-    this.messagePanel = null;
-  }
-
-  onNewMessageClick () {
-    this.messagePanel.scrollToBottom();
-    // Calling forceUpdate to "remove" the new message button
-    this.forceUpdate();
-  }
-
-  onScrollToBottom () {
-    console.log('Scrolled to bottom!');
-    this.forceUpdate();
-  }
-
   render () {
     return (
       <Box flex>
         <MessagePanel
-          messages={ this.props.messages }
+          messages={ this.props.sessionData === null ? [] : this.state.messages }
           scrollToBottom={ () => this.onScrollToBottom() }
           ref={ (elem) => {this.messagePanel = elem;} }
         />
@@ -132,47 +161,80 @@ class MessagePanelPresenter extends Component {
   }
 }
 
-class LoginWindowPresenter extends Component {
+class SendMessagePresenter extends Component {
+
+  constructor (props) {
+    super(props);
+  }
+
+  handleSendMessage (text) {
+  }
+
+  render () {
+    return (
+      <SendMessageBar
+        sendMessage={ (text) => this.handleSendMessage(text) }
+      />
+    );
+  }
+}
+
+class LoginPresenter extends Component {
   constructor (props) {
     super(props);
     this.state = {
-      logged_in: false,
-      checking: false,
-      checkResult: null
-    };
+      checking: null,
+      failedReason: null
+    }
   }
 
   onSubmit (evt) {
     console.log('Submit!');
-    console.log(evt.value);
     this.setState({checking: true});
-    this.onResultReceived({
-      ok: true,
-      sessionData: {
-        username: evt.value.username
+    axios.post('api/auth', {
+      username: evt.value.username, password: evt.value.password
+    })
+    .then((resp) => {
+      let result = {
+        ok: true,
+        sessionData: {
+          userName: evt.value.username,
+          token: resp.data.token
+        }
       }
-    });
+      this.onResultReceived(result)
+    })
+    .catch((error) => {
+      let result = {
+        ok: false,
+        reason: error.response.data.non_field_errors
+      }
+      this.onResultReceived(result)
+    })
   }
 
   onResultReceived (result) {
     if (result.ok) {
-      this.setState({logged_in: true, checking: false});
-      this.props.onLoggedIn(result.sessionData);
+      this.setState({
+        checking: false,
+        failedReason: null,
+      });
+      this.props.sessionUpdateHandler(result.sessionData);
     } else {
       this.setState({
-        logged_in: false,
         checking: false,
-        checkResult: result.reason
+        failedReason: result.reason
       })
+      this.props.sessionUpdateHandler(null);
     }
   }
 
   render () {
-    return (!this.state.logged_in &&
+    return (this.props.sessionData === null &&
       <LoginWindow
         checking={ this.state.checking }
         onSubmit={ (evt) => this.onSubmit(evt) }
-        checkResult={ this.state.checkResult }
+        failedReason={ this.state.failedReason }
       />
     );
   }

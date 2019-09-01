@@ -13,15 +13,16 @@ export class SessionManager {
 }
 
 export class MessageManager {
-  constructor () {
+  constructor (token, onReceive) {
+    this.token = token
+    this.onReceiveCallback = onReceive;
+
     var ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
-    var ws_path = ws_scheme + '://' + window.location.host + '/ws/';
+    var ws_path = ws_scheme + '://' + window.location.host + '/ws?token=' + token;
     console.log("Connecting to " + ws_path);
     var socket = new WebSocket(ws_path);
     this.socket = socket;
     this.socket.onmessage = (wsMsg) => { this.onReceive(wsMsg) };
-
-    this.onReceiveCallback = null;
   }
 
   send (userName, text) {
@@ -43,5 +44,10 @@ export class MessageManager {
       data['id'],
       new Date(data['timestamp'] * 1000)
     );
+  }
+
+  close () {
+    console.log('MessageManager close!');
+    this.socket.close();
   }
 }

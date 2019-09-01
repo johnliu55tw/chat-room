@@ -235,14 +235,6 @@ export class LoginWindow extends Component {
     }
   }
 
-  getCheckResult (fieldName) {
-    if (this.props.checkResult === null) {
-      return null;
-    } else {
-      return this.props.checkResult[fieldName];
-    }
-  }
-
   render () {
     return (
       <Layer animation='fadeIn'>
@@ -250,15 +242,19 @@ export class LoginWindow extends Component {
           <Form onSubmit={ (evt) => {this.onSubmit(evt)} }>
             <FormField
               required={ true }
-              validate={ {
-                regexp: /^[a-zA-Z0-9_ -]+$/,
-                message: 'Invalid characers!'}
-              }
-              error={ this.getCheckResult('username') }
               name='username'
               disabled={ this.props.checking }
-              label='Your Name:'
-            />
+              label='Username'
+              error={ this.props.failedReason && ' ' }
+              />
+            <FormField
+              type='password'
+              required={ true }
+              name='password'
+              disabled={ this.props.checking }
+              label='Password'
+              error={ this.props.failedReason }
+              />
             { this.renderButton() }
           </Form>
         </Box>
