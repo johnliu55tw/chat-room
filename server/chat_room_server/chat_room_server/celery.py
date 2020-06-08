@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import datetime
 
 from celery import Celery
 from asgiref.sync import async_to_sync
@@ -28,7 +29,7 @@ def message_notify(msg_dict):
             'username': msg_dict['sender'],
             'content': msg_dict['content'],
             'id': str(msg_dict['id']),
-            'timestamp': msg_dict['created']
+            'timestamp': datetime.strptime(msg_dict['created'], '%Y-%m-%dT%H:%M:%S.%fZ').timestamp()
         })
     }
 
