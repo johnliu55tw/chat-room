@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import { Box, Button, Menu, Text, Paragraph, TextArea, Keyboard, Layer, Form, FormField } from 'grommet';
 import { Notification, Chat, User } from 'grommet-icons';
 
@@ -178,38 +178,31 @@ export const NewMessageNotification = (props) => (
   </Layer>
 )
 
-class Message extends Component {
-  constructor (props) {
-    super(props);
-    this.state = {
-      hover: false
-    }
-  }
+export const Message = (props) => {
+  const [hover, setHover] = useState(false);
 
-  render () {
-    return (
-      <Box
-        flex={ false }
-        direction='column'
-        background={ this.state.hover ? 'light-4' : 'light-3' }
-        pad={{ left: 'small', right: 'small', vertical: 'small' }}
-        elevation='none'
-        onMouseEnter={ () => this.setState({hover: true}) }
-        onMouseLeave={ () => this.setState({hover: false}) }
-        {...this.props}
-      >
-        <Box direction='row' justify='between' align='start'>
-          <Text weight='bold' textAlign='start'>{ this.props.userName }</Text>
-          { this.state.hover && (
-            <Text weight='normal' size='small' textAlign='end'>
-              { this.props.date.toString() }
-            </Text>
-          )}
-        </Box>
-        <MessageBody message={ this.props.message }/>
+  return (
+    <Box
+      flex={ false }
+      direction='column'
+      background={ hover ? 'light-4' : 'light-3' }
+      pad={{ left: 'small', right: 'small', vertical: 'small' }}
+      elevation='none'
+      onMouseEnter={ () => setHover(true) }
+      onMouseLeave={ () => setHover(false) }
+      {...props}
+    >
+      <Box direction='row' justify='between' align='start'>
+        <Text weight='bold' textAlign='start'>{ props.userName }</Text>
+        { hover && (
+          <Text weight='normal' size='small' textAlign='end'>
+            { props.date.toString() }
+          </Text>
+        )}
       </Box>
-    );
-  }
+      <MessageBody message={ props.message }/>
+    </Box>
+  );
 }
 
 export const MessageBody = (props) => (
