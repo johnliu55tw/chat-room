@@ -5,6 +5,10 @@ import axios from 'axios';
 import { AppBar, MessagePanel, SendMessageBar, NewMessageNotification, LoginWindow } from './view.js';
 import { SessionManager, MessageManager } from './model.js';
 
+// Use context object to manage session ID
+const SessionContext = React.createContext(null);
+
+
 export class TestApp extends Component {
 
   constructor (props) {
@@ -41,22 +45,18 @@ export class TestApp extends Component {
   render () {
     return (
       <Grommet theme={ grommet } full>
-        <Box fill>
-          <AppBarPresenter
-            sessionData={ this.state.sessionData }
-            sessionUpdateHandler={ (sData) => {this.onSessionUpdate(sData)} }
-          />
-          <MessagePanelPresenter
-            sessionData={ this.state.sessionData }
-          />
-          <SendMessagePresenter
-            sessionData={ this.state.sessionData }
-          />
-          <LoginPresenter
-            sessionData={ this.state.sessionData }
-            sessionUpdateHandler={ (sData) => {this.onSessionUpdate(sData)} }
-          />
-        </Box>
+        <SessionContext.Provider value={ this.state.sessionData }>
+          <Box fill>
+            <AppBarPresenter
+              sessionUpdateHandler={ (sData) => {this.onSessionUpdate(sData)} }
+            />
+            <MessagePanelPresenter/>
+            <SendMessagePresenter />
+            <LoginPresenter
+              sessionUpdateHandler={ (sData) => {this.onSessionUpdate(sData)} }
+            />
+          </Box>
+        </SessionContext.Provider>
       </Grommet>
     )
   }
@@ -65,7 +65,8 @@ export class TestApp extends Component {
 class AppBarPresenter extends Component {
 
   getUserName () {
-    return this.props.sessionData !== null ? this.props.sessionData.userName : '';
+    let session = this.context;
+    return session !== null ? session.userName : '';
   }
 
   onLogOut () {
@@ -82,6 +83,7 @@ class AppBarPresenter extends Component {
     )
   }
 }
+AppBarPresenter.contextType = SessionContext;
 
 class MessagePanelPresenter extends Component {
   constructor (props) {
@@ -95,14 +97,15 @@ class MessagePanelPresenter extends Component {
   }
 
   componentDidUpdate (prevProps, prevState, snapshot) {
-    if (prevProps.sessionData === null && this.props.sessionData !== null) {
+    let session = this.context;
+    if (this.messageManager === null && session !== null) {
       // User logged in
       console.log('Session Data updated, create message manager.');
       this.messageManager = new MessageManager(
-        this.props.sessionData.token,
+        session.token,
         this.onNewMessageReceived.bind(this),
       );
-    } else if (this.props.sessionData === null && this.messageManager !== null) {
+    } else if (this.messageManager !== null && session === null) {
       console.log('Log out!!!');
       this.messageManager.close();
       this.messageManager = null;
@@ -139,10 +142,6 @@ class MessagePanelPresenter extends Component {
     ));
   }
 
-  onSendMessage (text) {
-    this.messageManager.send(this.state.userSession.username, text);
-  }
-
   render () {
     return (
       <Box flex>
@@ -160,14 +159,36 @@ class MessagePanelPresenter extends Component {
     )
   }
 }
+MessagePanelPresenter.contextType = SessionContext;
 
 class SendMessagePresenter extends Component {
 
   constructor (props) {
     super(props);
+
+    this.messageManager = null;
+  }
+
+  componentDidUpdate (prevProps, prevState, snapshot) {
+    let session = this.context;
+
+    if (this.messageManager === null && session !== null) {
+      // User logged in
+      console.log('Session Data updated, create message manager.');
+      this.messageManager = new MessageManager(
+        session.token,
+        function (){} // Don't do anything when message received
+      );
+    } else if (this.messageManager !== null && session === null) {
+      console.log('Log out!!!');
+      this.messageManager.close();
+      this.messageManager = null;
+    }
   }
 
   handleSendMessage (text) {
+    let session = this.context;
+    this.messageManager.send(session.userName, text);
   }
 
   render () {
@@ -178,6 +199,7 @@ class SendMessagePresenter extends Component {
     );
   }
 }
+SendMessagePresenter.contextType = SessionContext;
 
 class LoginPresenter extends Component {
   constructor (props) {
@@ -230,7 +252,8 @@ class LoginPresenter extends Component {
   }
 
   render () {
-    return (this.props.sessionData === null &&
+    let session = this.context;
+    return (session === null &&
       <LoginWindow
         checking={ this.state.checking }
         onSubmit={ (evt) => this.onSubmit(evt) }
@@ -239,3 +262,4 @@ class LoginPresenter extends Component {
     );
   }
 }
+LoginPresenter.contextType = SessionContext;
