@@ -163,32 +163,15 @@ MessagePanelPresenter.contextType = SessionContext;
 
 class SendMessagePresenter extends Component {
 
-  constructor (props) {
-    super(props);
-
-    this.messageManager = null;
-  }
-
-  componentDidUpdate (prevProps, prevState, snapshot) {
-    let session = this.context;
-
-    if (this.messageManager === null && session !== null) {
-      // User logged in
-      console.log('Session Data updated, create message manager.');
-      this.messageManager = new MessageManager(
-        session.token,
-        function (){} // Don't do anything when message received
-      );
-    } else if (this.messageManager !== null && session === null) {
-      console.log('Log out!!!');
-      this.messageManager.close();
-      this.messageManager = null;
-    }
-  }
-
   handleSendMessage (text) {
     let session = this.context;
-    this.messageManager.send(session.userName, text);
+    axios.post('api/user_messages',
+      {sender: session.userName, content: text},
+      {headers: {'Authorization': 'Token ' + session.token}}
+    ).catch((error) => {
+      console.log('Unable to setn message:');
+      console.log(error);
+    })
   }
 
   render () {
